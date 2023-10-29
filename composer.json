@@ -1,0 +1,27 @@
+{
+  "name": "cmslz/tencent-map",
+  "description": "腾讯地图API扩展库",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "php",
+    "腾讯地图"
+  ],
+  "autoload": {
+    "psr-4": {
+      "Cmslz\\TencentMap\\": "src/"
+    },
+    "files": [
+      "src/function.php"
+    ]
+  },
+  "authors": [
+    {
+      "name": "xiaobai"
+    }
+  ],
+  "require": {
+    "php": ">=8.0",
+    "guzzlehttp/guzzle": "^7.8"
+  }
+}
