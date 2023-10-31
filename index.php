@@ -2,7 +2,7 @@
 
 require(__DIR__ . '/vendor/autoload.php');
 
-$app = new \Cmslz\TencentMap\Application('54YBZ-L4RCX-GMP4X-ZZWPY-ZUWPJ-5JB2X');
+$app = new \Cmslz\TencentMap\Application('54YBZ-L4RCX-GMP4X-xxxx-ZUWPJ-xxxx');
 //$result = $app->webServerApi()->locationSearch('颐和园', 'region(北京,0)', ['page_size' => 20]);
 //$result = $app->webServerApi()->locationSearchByExplore('nearby(40.040394,116.273523,1000)',['page_size' => 20, 'policy' => 1]);
 //$result = $app->webServerApi()->locationSearchByDetailId(6621879543162709731);
