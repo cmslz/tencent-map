@@ -2,6 +2,7 @@
 
 namespace Cmslz\TencentMap;
 
+use Cmslz\TencentMap\Exception\MapException;
 use Cmslz\TencentMap\Exception\ServerException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -41,16 +42,19 @@ class Request
      * 发送get请求
      * @param string $path
      * @param array $data
+     * @param array $config
      * @return Response
      * @throws GuzzleException
+     * @throws MapException
      * @throws ServerException
      */
-    public function get(string $path, array $data = []): Response
+    public function get(string $path, array $data = [], array $config = []): Response
     {
         return $this->beforeResponse(
             $this->client->request('get', $this->formatPath($path, $data), [
                 'headers' => $this->headers
-            ])
+            ]),
+            $config
         );
     }
 
@@ -58,33 +62,59 @@ class Request
      * 发送post请求
      * @param string $path
      * @param array $data
+     * @param array $config
      * @return Response
      * @throws GuzzleException
+     * @throws MapException
      * @throws ServerException
      */
-    public function post(string $path, array $data = []): Response
+    public function post(string $path, array $data = [], array $config = []): Response
     {
         return $this->beforeResponse(
             $this->client->request('post', $this->formatPath($path), [
-                'form_params' => array_merge($data, ['key' => $this->key]),
-                'headers' => $this->headers
-            ])
+                'json' => $data,
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    ...$this->headers
+                ]
+            ]),
+            $config
         );
     }
 
     /**
      * 请求后前置处理response
      * @param GuzzleResponse $response
+     * @param array $config
      * @return Response
+     * @throws MapException
      * @throws ServerException
      */
-    protected function beforeResponse(GuzzleResponse $response): Response
+    protected function beforeResponse(GuzzleResponse $response, array $config = []): Response
     {
-        $this->response = new Response($response);
-        if ($this->response['status'] !== 0) {
-            throw new ServerException($this->response['message']);
+        $this->response = new Response($response, $config['result_type'] ?? Response::RESULT_JSON);
+        $result = $this->response->getResult();
+        if (!is_array($result)) {
+            $result = @json_decode($result, JSON_UNESCAPED_UNICODE);
+        }
+        if (is_array($result)) {
+            $this->checkResponse($result);
         }
         return $this->response();
+    }
+
+    /**
+     * @param array $result
+     * @return void
+     * @throws ServerException
+     */
+    protected function checkResponse(array $result): void
+    {
+        if (isset($result['infocode']) && $result['infocode'] !== '10000') {
+            throw new ServerException($result['info']);
+        } elseif (isset($result['errcode']) && $result['errcode'] !== 0) {
+            throw new ServerException($result['errmsg']);
+        }
     }
 
     /**
